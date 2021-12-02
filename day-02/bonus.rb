@@ -1,9 +1,6 @@
-lines = File.readlines('input.txt')
-tuples = lines.map{|l| l.split(' ')}
-sum_by_direction = tuples
-  .group_by{|t| t[0]}
-  .map{|g, values| [g, values.map{|v| v[1].to_i}.sum]}
-  .to_h
-
-part_1 = sum_by_direction["forward"] * (sum_by_direction["down"] - sum_by_direction["up"])
-puts part_1
+$depth = 0; $position = 0; $aim = 0;
+def down(n); $aim = $aim + n; end
+def up(n); $aim = $aim - n; end
+def forward(n); $position = $position + n; $depth = $depth + $aim * n; end
+File.readlines('input.txt').each{|l|eval(l)}
+puts $depth * $position
