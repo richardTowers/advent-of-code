@@ -14,11 +14,12 @@ hs ← ({(1⌷⊃0⌷⍵)=(1⌷⊃1⌷⍵)}¨i)/i
 
 board ← 1000 1000 ⍴ 0
 
+f ← {indexes ← ⍵[⍋⍵] ⋄ select ← indexes[0]+⍸((⊃indexes[1]-indexes[0])+1)⍴1 ⋄ board[⌽¨select] ← board[⌽¨select] + 1}
 ⍝ Add the horizontals
-{indexes ← ⍵[⍋⍵] ⋄ len ← (⊃indexes[1] - indexes[0])[0] + 1 ⋄ select ← indexes[0]+⍸ len 1⍴1 ⋄ board[⌽¨select] ← board[⌽¨select] + 1}¨hs
+f¨hs
 
 ⍝ Add the verticals
-{indexes ← ⍵[⍋⍵] ⋄ len ← (⊃indexes[1] - indexes[0])[1] + 1 ⋄ select ← indexes[0]+⍸ 1 len ⍴1 ⋄ board[⌽¨select] ← board[⌽¨select] + 1}¨vs
+f¨vs
 
 ]DISPLAY +/+/board > 1
 
