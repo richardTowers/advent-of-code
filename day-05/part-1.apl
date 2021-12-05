@@ -1,11 +1,3 @@
-⍝ Make ]DISPLAY work in dialog APL:
-)load buildse
-BUILD_SESSION 'UK'
-
-⍝ Set the print width wider than the tiny 80 character default
-⎕PW ← 200
-
-⍝ Code:
 ⎕IO ← 0
 
 i ← {(⍎⊃⍵[0]) (⍎⊃⍵[2])}¨' '(≠⊆⊢)¨⊃⎕NGET'input.txt'1
@@ -21,5 +13,5 @@ f¨hs
 ⍝ Add the verticals
 f¨vs
 
-]DISPLAY +/+/board > 1
++/+/board > 1
 
