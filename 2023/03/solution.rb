@@ -28,7 +28,7 @@ puts "Part 1: #{valid_part_numbers.sum(&:value)}"
 
 gear_ratios = symbols
   .select { |symbol| symbol.value == "*" }
-  .map { |symbol| part_numbers.select { |part| symbol.overlap?(part) } }
+  .map { |symbol| valid_part_numbers.select { |part| symbol.overlap?(part) } }
   .select { |parts| parts.length == 2 }
   .map { |parts| parts.map(&:value).inject(:*) }
 
