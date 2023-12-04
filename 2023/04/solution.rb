@@ -12,6 +12,10 @@ Card = Struct.new(:number, :winning_numbers, :actual_numbers) do
 
     2**(actual_winning_numbers.length - 1)
   end
+
+  def following_range
+    @following_range ||= ((number + 1)...(number + actual_winning_numbers.length + 1))
+  end
 end
 
 original_cards = lines.map do |line|
@@ -25,12 +29,11 @@ end
 
 puts "Part 1: #{original_cards.map(&:points).sum}"
 
-cards_by_card_number = original_cards.group_by(&:number)
+cards_by_card_number = original_cards.map{|c| [c.number, c]}.to_h
 
 cards_and_copies = original_cards
 cards_and_copies.each do |card|
-  range_to_add = ((card.number + 1)...(card.number + card.actual_winning_numbers.length + 1))
-  cards_to_add = range_to_add.flat_map { |n| cards_by_card_number[n] }
+  cards_to_add = card.following_range.map { |n| cards_by_card_number[n] }
   cards_and_copies.push(*cards_to_add)
 end
 
