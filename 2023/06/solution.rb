@@ -13,7 +13,7 @@ distances = lines[1].scan(/\d+/).map(&:to_i)
 def ways_to_win(time, distance)
   solutions = solve_quadratic(-1, time, -distance)
   result = (solutions.first.ceil...solutions.last.ceil).size
-  result -= 1 if solutions.last == solutions.last.ceil
+  result -= 1 if (solutions.first % 1) == 0 # Exclude the start of the range if it's an integer
   result
 end
 
