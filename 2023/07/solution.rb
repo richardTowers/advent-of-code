@@ -11,7 +11,7 @@ Card = Data.define(:label) do
 end
 
 Hand = Data.define(:cards, :bid, :joker) do
-  def bonus()
+  def bonus
     counts = cards.each_with_object(Hash.new(0)) { |card, h| h[card.label] += 1 }
     if joker
       jokerCount = counts.delete(joker) || 0
@@ -29,7 +29,7 @@ Hand = Data.define(:cards, :bid, :joker) do
   end
 
   def score
-    bonus + cards.map{ |c| c.hex(joker) }.join("").to_i(16)
+    bonus + cards.map { |c| c.hex(joker) }.join("").to_i(16)
   end
 end
 
@@ -46,5 +46,5 @@ end
 
 part1 = winnings(hands).sum
 puts "Part 1: #{part1}"
-part2 = winnings(hands.map{|h| Hand.new(h.cards, h.bid, 'J') }).sum
+part2 = winnings(hands.map { |h| Hand.new(h.cards, h.bid, "J") }).sum
 puts "Part 2: #{part2}"
