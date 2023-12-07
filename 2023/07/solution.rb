@@ -12,12 +12,12 @@ end
 
 Hand = Data.define(:cards, :bid, :joker) do
   def bonus
-    counts = cards.each_with_object(Hash.new(0)) { |card, h| h[card.label] += 1 }
+    counts = cards.group_by(&:label).transform_values(&:length)
     if joker
       jokerCount = counts.delete(joker) || 0
       maxOtherCount = counts.max_by { |_k, v| v }
       if maxOtherCount.nil?
-        counts["J"] = jokerCount
+        counts[joker] = jokerCount
       else
         counts[maxOtherCount[0]] = maxOtherCount[1] + jokerCount unless maxOtherCount.nil?
       end
@@ -25,7 +25,7 @@ Hand = Data.define(:cards, :bid, :joker) do
     trickString = counts.values.sort.join("")
     trickPatterns = [/5/, /4/, /23/, /3/, /22/, /2/, /1/]
     index = trickPatterns.index { |trickPattern| trickString =~ trickPattern }
-    (7 - index) * 0x100000
+    (trickPatterns.length - index) * (0x10 ** cards.length)
   end
 
   def score
