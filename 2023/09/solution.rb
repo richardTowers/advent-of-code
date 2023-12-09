@@ -1,13 +1,13 @@
 #!/usr/bin/env ruby
 
-def steps(list, &block)
+def steps(list)
   diffs = list.each_cons(2).map{|x, y| y - x}
   return [] if diffs.all?(&:zero?)
-  [block.call(diffs), *steps(diffs, &block)]
+  [diffs.last, *steps(diffs)]
 end
 
 def solve(list)
-  list.last + steps(list, &:last).reduce(0){|acc, s| s + acc}
+  list.last + steps(list).reduce(0){|acc, s| s + acc}
 end
 
 input = ARGF.readlines.map{|line| line.scan(/-?\d+/).map(&:to_i)}
