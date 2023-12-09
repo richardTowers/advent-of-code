@@ -1,21 +1,16 @@
 #!/usr/bin/env ruby
 
-def lastSteps(enum)
-  diffs = enum.each_cons(2).map{|x, y| y - x}
+def steps(list, &block)
+  diffs = list.each_cons(2).map{|x, y| y - x}
   return [] if diffs.all?(&:zero?)
-  [diffs.last, *lastSteps(diffs)]
+  [block.call(diffs), *steps(diffs, &block)]
 end
 
-def firstSteps(enum)
-  diffs = enum.each_cons(2).map{|x, y| y - x}
-  return [] if diffs.all?(&:zero?)
-  [*firstSteps(diffs), diffs.first]
+def solve(list)
+  list.last + steps(list, &:last).reduce(0){|acc, s| s + acc}
 end
 
 input = ARGF.readlines.map{|line| line.scan(/-?\d+/).map(&:to_i)}
 
-part1 = input.map{|list| list.last  +  lastSteps(list).reduce(0){|acc, s| s + acc}}.sum
-part2 = input.map{|list| list.first - firstSteps(list).reduce(0){|acc, s| s - acc}}.sum
-
-puts "Part 1: #{part1}"
-puts "Part 2: #{part2}"
+puts "Part 1: #{input.map{|line| solve(line)}.sum}"
+puts "Part 2: #{input.map{|line| solve(line.reverse)}.sum}"
