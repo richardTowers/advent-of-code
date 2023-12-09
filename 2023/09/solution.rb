@@ -2,15 +2,11 @@
 
 def steps(list)
   diffs = list.each_cons(2).map{|x, y| y - x}
-  return [] if diffs.all?(&:zero?)
-  [diffs.last, *steps(diffs)]
-end
-
-def solve(list)
-  list.last + steps(list).reduce(0){|acc, s| s + acc}
+  return [list.last] if diffs.all?(&:zero?)
+  [list.last, *steps(diffs)]
 end
 
 input = ARGF.readlines.map{|line| line.scan(/-?\d+/).map(&:to_i)}
 
-puts "Part 1: #{input.map{|line| solve(line)}.sum}"
-puts "Part 2: #{input.map{|line| solve(line.reverse)}.sum}"
+puts "Part 1: #{input.map{|line| steps(line).sum}.sum}"
+puts "Part 2: #{input.map{|line| steps(line.reverse).sum}.sum}"
