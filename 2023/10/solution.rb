@@ -24,7 +24,7 @@ Cell = Data.define(:value, :coords) do
   end
 end
 
-Grid = Data.define(:grid) do
+Loop = Data.define(:grid) do
   include Enumerable
 
   def initialize(args)
@@ -53,7 +53,7 @@ Grid = Data.define(:grid) do
     directions = neighbours(cell.coords).select{|key, cell| INSTRUCTIONS.fetch(cell.value, {}).keys.include? key}.keys
     movers = directions.map{|d| Mover.new(cell, d)}
     while true
-      yield movers.map{|m| m.cell}
+      yield movers.map{|m| m.cell.coords}
       movers = movers.map do |mover|
         cell = lookup(mover.cell.offset(CARDINALS[mover.direction]))
         direction = INSTRUCTIONS[cell.value][mover.direction]
@@ -64,8 +64,52 @@ Grid = Data.define(:grid) do
   end
 end
 
-grid = Grid.new(ARGF.readlines.map(&:strip).map { |l| l.split("") })
+l = Loop.new(ARGF.readlines.map(&:strip).map { |l| l.split("") })
 
-part1 = grid.drop(1).take_while { |a, b| a != b }.length + 1
+part1 = l.drop(1).take_while { |a, b| a != b }.length + 1
 
 puts "Part 1: #{part1}"
+
+loopCoords = l.map(&:first).to_a # TODO - no unpair the iterator
+
+loopOnly = ""
+l.grid.each_with_index do |row, y|
+  loopOnlyRow = ""
+  row.each_with_index do |cell, x|
+    if loopCoords.include? [x, y]
+      loopOnlyRow << l.lookup([x, y]).value
+    else
+      loopOnlyRow << '.'
+    end
+  end
+  loopOnly << loopOnlyRow
+  loopOnly << "\n"
+end
+
+puts loopOnly.gsub('L', '┗').gsub('J', '┛').gsub('7', '┓').gsub('F', '┏').gsub('|', '┃').gsub('-', '━')
+puts
+
+enclosedCounter = 0
+loopOnly.split("\n").each do |row|
+  crossings = row.gsub(/(F-*)J/, '\1|').gsub(/(L-*)7/, '\1|').gsub(/S/, '|').split("")
+  counter = 0
+  outRow = ""
+  crossings.each do |cell|
+    if cell == "|"
+      counter += 1
+      outRow << cell
+    elsif cell == "."
+      if counter.odd?
+        outRow << "I"
+        enclosedCounter += 1
+      else
+        outRow << "O"
+      end
+    else
+      outRow << cell
+    end
+  end
+  puts outRow
+end
+
+puts "Part 2: #{enclosedCounter}"
