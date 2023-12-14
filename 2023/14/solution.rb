@@ -9,11 +9,11 @@ def s(grid)
 end
 
 def w(grid)
-  e(grid.transpose.reverse.transpose).transpose.reverse.transpose
+  e(grid.map(&:reverse)).map(&:reverse)
 end
 
 def n(grid)
-  e(grid.reverse.transpose).transpose.reverse
+  s(grid.reverse).reverse
 end
 
 def sum_weights(grid)
