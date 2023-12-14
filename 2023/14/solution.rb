@@ -1,43 +1,40 @@
 #!/usr/bin/env ruby
 
-def tilt_east(grid)
+def e(grid)
   grid.map{|col| col.join("").scan(/[O.]+|#*/).map{|m| m.split("").sort}.flatten}
 end
 
-def tilt_south(grid)
-  tilt_east(grid.transpose).transpose
+def s(grid)
+  e(grid.transpose).transpose
 end
 
-def tilt_west(grid)
-  tilt_east(grid.transpose.reverse.transpose).transpose.reverse.transpose
+def w(grid)
+  e(grid.transpose.reverse.transpose).transpose.reverse.transpose
 end
 
-def tilt_north(grid)
-  tilt_east(grid.reverse.transpose).transpose.reverse
+def n(grid)
+  e(grid.reverse.transpose).transpose.reverse
 end
 
 def sum_weights(grid)
   grid.map.with_index{|row, i| row.count{|c| c=="O"} * (grid.length - i)}.sum
 end
 
-grid = ARGF.readlines.map(&:strip).map{|line| line.split("")}
-ng = tilt_north(grid)
-puts "Part 1: #{sum_weights(tilt_north(grid))}"
-
-grids = []
-while true do
-  grid = tilt_north(grid)
-  grid = tilt_west(grid)
-  grid = tilt_south(grid)
-  grid = tilt_east(grid)
-
-  if grids.include? grid
-    cycleStartPos = grids.index(grid)
-    cycleLength = grids.length - cycleStartPos
-    part2 = sum_weights(grids[cycleStartPos + ((1_000_000_000 - cycleStartPos) % cycleLength) - 1])
-    puts "Part 2: #{part2}"
-    break
-  else
-    grids << grid
+def find_in_cycle(value, target_index)
+  values = []
+  while true do
+    value = yield value
+    if values.include? value
+      start = values.index(value)
+      length = values.length - start
+      return values[start + ((1_000_000_000 - start) % length) - 1]
+    else
+      values << value
+    end
   end
 end
+
+grid = ARGF.readlines.map(&:strip).map{|line| line.split("")}
+puts "Part 1: #{sum_weights(n(grid))}"
+grid = find_in_cycle(grid, 1_000_000_000) {|x| e(s(w(n(x)))) }
+puts "Part 2: #{sum_weights(grid)}"
