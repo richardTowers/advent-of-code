@@ -62,10 +62,7 @@ Beam = Data.define(:position, :momentum) do
   end
 end
 
-if __FILE__ == $PROGRAM_NAME
-  grid = ARGF.readlines.map(&:strip).map { _1.split("").freeze }.freeze
-
-  beams = [Beam.new(position: [0, 0], momentum: [1, 0])]
+def energize(grid, beams)
   visited = beams.to_set
 
   until beams.empty?
@@ -74,5 +71,29 @@ if __FILE__ == $PROGRAM_NAME
     visited |= beams
   end
 
-  puts "Part 1: #{visited.map(&:position).to_set.length}"
+  visited.map(&:position).to_set.length
+end
+
+if __FILE__ == $PROGRAM_NAME
+  grid = ARGF.readlines.map(&:strip).map { _1.split("").freeze }.freeze
+
+  beams = [Beam.new(position: [0, 0], momentum: RIGHT)]
+  puts "Part 1: #{energize(grid, beams)}"
+
+  possible_beams = grid.flat_map.with_index { |row, i|
+    [
+      Beam.new(position: [0, i], momentum: RIGHT),
+      Beam.new(position: [row.length - 1, i], momentum: LEFT)
+    ]
+  } + grid.first.flat_map.with_index { |col, i|
+    [
+      Beam.new(position: [i, 0], momentum: DOWN),
+      Beam.new(position: [i, grid.length - 1], momentum: UP)
+    ]
+  }
+  possible_energies = possible_beams.map.with_index do |beam, i|
+    puts "#{i} of #{possible_beams.length}"
+    energize(grid, [beam])
+  end
+  puts "Part 2: #{possible_energies.max}"
 end
