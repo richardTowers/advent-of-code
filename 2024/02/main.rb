@@ -4,29 +4,18 @@
 lines = ARGF.readlines
 reports = lines.map { |line| line.split.map(&:to_i) }
 
-def is_report_safe(report)
-  pp report
-  safe = true
-  prev = report[0]
-  original_direction = (report[1] <=> report[0])
-  report.drop(1).each do |level|
-    difference = (level - prev).abs
-    direction = (level <=> prev)
-
-    safe = false if difference < 1 || difference > 3 || direction != original_direction
-    prev = level
-  end
-  pp safe
-  safe
+def report_safe?(report)
+  directions = report.each_cons(2).map { |l, r| l <=> r }
+  differences = report.each_cons(2).map { |l, r| (l - r).abs }
+  directions.all? { |d| d == directions.first } && differences.all? { |d| (1..3).include? d }
 end
 
-safe_reports = reports.select do |report|
-  candidate_reports = (0..report.length).map do
-    new_report = report.dup
-    new_report.delete_at(_1)
-    new_report
-  end
-  [report, *candidate_reports].any? { is_report_safe(_1) }
-end
+part1 = reports.select { report_safe?(_1) }.count
 
-pp safe_reports.count
+part2 = reports.select do |report|
+  candidate_reports = (0..report.length).map { |index_to_drop| report.reject.with_index { index_to_drop == _2 } }
+  [report, *candidate_reports].any? { report_safe?(_1) }
+end.count
+
+puts "Part 1: #{part1}"
+puts "Part 2: #{part2}"
