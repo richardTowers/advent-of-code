@@ -27,9 +27,7 @@ rotations = [
   rotate(rotate(chars)),
   rotate(rotate(rotate(chars)))
 ]
-part_1_candidates = rotations.flat_map do |rotation|
-  [rotation, diagonals(rotation)]
-end
+part_1_candidates = rotations.flat_map { [_1, diagonals(_1)] }
 
 # Part 1
 needle = %w[X M A S]
@@ -40,21 +38,11 @@ part1 = part_1_candidates.sum do |candidate|
 end
 
 # Part 2
-needle = [
-  %w[M . S],
-  %w[. A .],
-  %w[M . S]
-]
 part2 = rotations.sum do |rotation|
   rotation.each_cons(3).sum do |rows|
     candidates = rows.map { |row| row.each_cons(3).to_a }.transpose
     candidates.sum do |candidate|
-      puts candidate.map(&:join).join("\n")
-      if candidate[0][0] == 'M' &&
-         candidate[0][2] == 'S' &&
-         candidate[1][1] == 'A' &&
-         candidate[2][0] == 'M' &&
-         candidate[2][2] == 'S'
+      if candidate in [['M', _, 'S'], [_, 'A', _ ], ['M', _, 'S']]
         1
       else
         0
