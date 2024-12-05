@@ -33,15 +33,15 @@ input = ARGF.read
 
 rules_input, updates_input = input.split("\n\n")
 
-rules = rules_input.split("\n").map { _1.split('|').map(&:to_i) }.map { Rule.new(_1, _2) }
+rules = rules_input.split("\n").map { _1.split('|').map(&:to_i) }.to_h { [Set[_1, _2], Rule.new(_1, _2)] }
 updates = updates_input.split("\n").map { |update| update.split(',').map(&:to_i) }
 
 # Part 1
-correct, incorrect = updates.partition { |update| rules.all? { |rule| rule.check(update) } }
+correct, incorrect = updates.partition { |update| rules.values.all? { |rule| rule.check(update) } }
 part1 = correct.sum { mid(_1) }
 
 # Part 2
-part2 = incorrect.sum { mid(_1.sort { |f, s| rules.find { |r| r.applies?(f, s) }.compare(f, s) }) }
+part2 = incorrect.sum { mid(_1.sort { |f, s| rules[Set[f, s]].compare(f, s) }) }
 
 # Print output
 puts "Part 1: #{part1}"
