@@ -18,30 +18,50 @@ def diagonals(input)
   indexes
     .group_by { |x, y| x - y }
     .values
-    .map { |diagonal| diagonal.map { |x,y| input[y][x] } }
+    .map { |diagonal| diagonal.map { |x, y| input[y][x] } }
 end
 
-candidates = [
+rotations = [
   chars,
-  diagonals(chars),
   rotate(chars),
-  diagonals(rotate(chars)),
   rotate(rotate(chars)),
-  diagonals(rotate(rotate(chars))),
-  rotate(rotate(rotate(chars))),
-  diagonals(rotate(rotate(rotate(chars)))),
+  rotate(rotate(rotate(chars)))
 ]
+part_1_candidates = rotations.flat_map do |rotation|
+  [rotation, diagonals(rotation)]
+end
 
 # Part 1
 needle = %w[X M A S]
-part1 = candidates.sum do |candidate|
+part1 = part_1_candidates.sum do |candidate|
   candidate.sum do |row|
     row.each_cons(needle.length).count(needle)
   end
 end
 
 # Part 2
-part2 = nil
+needle = [
+  %w[M . S],
+  %w[. A .],
+  %w[M . S]
+]
+part2 = rotations.sum do |rotation|
+  rotation.each_cons(3).sum do |rows|
+    candidates = rows.map { |row| row.each_cons(3).to_a }.transpose
+    candidates.sum do |candidate|
+      puts candidate.map(&:join).join("\n")
+      if candidate[0][0] == 'M' &&
+         candidate[0][2] == 'S' &&
+         candidate[1][1] == 'A' &&
+         candidate[2][0] == 'M' &&
+         candidate[2][2] == 'S'
+        1
+      else
+        0
+      end
+    end
+  end
+end
 
 # Print output
 puts "Part 1: #{part1}"
