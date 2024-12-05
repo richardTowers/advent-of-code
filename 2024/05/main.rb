@@ -3,8 +3,12 @@
 
 # Definitions
 Rule = Data.define(:first, :second) do
+  def applies?(*args)
+    args.include?(first) && args.include?(second)
+  end
+
   def check(update)
-    return true unless update.include?(first) && update.include?(second)
+    return true unless applies?(*update)
 
     update.index(first) < update.index(second)
   end
@@ -29,18 +33,15 @@ input = ARGF.read
 
 rules_input, updates_input = input.split("\n\n")
 
-rules = rules_input.split("\n").map { _1.split('|') }.map { Rule.new(_1, _2) }
-updates = updates_input.split("\n").map { |update| update.split(',') }
+rules = rules_input.split("\n").map { _1.split('|').map(&:to_i) }.map { Rule.new(_1, _2) }
+updates = updates_input.split("\n").map { |update| update.split(',').map(&:to_i) }
 
 # Part 1
 correct, incorrect = updates.partition { |update| rules.all? { |rule| rule.check(update) } }
-part1 = correct.sum { |update| mid(update).to_i }
+part1 = correct.sum { mid(_1) }
 
 # Part 2
-part2 = incorrect.sum do |update|
-  sorted = update.sort { |f, s| rules.map { |r| r.compare(f, s) }.reject(&:zero?).first }
-  mid(sorted).to_i
-end
+part2 = incorrect.sum { mid(_1.sort { |f, s| rules.find { |r| r.applies?(f, s) }.compare(f, s) }) }
 
 # Print output
 puts "Part 1: #{part1}"
