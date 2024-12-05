@@ -30,10 +30,9 @@ rotations = [
 part_1_candidates = rotations.flat_map { [_1, diagonals(_1)] }
 
 # Part 1
-needle = %w[X M A S]
 part1 = part_1_candidates.sum do |candidate|
   candidate.sum do |row|
-    row.each_cons(needle.length).count(needle)
+    row.each_cons(4).count { (_1 in ['X', 'M', 'A', 'S'])}
   end
 end
 
@@ -41,7 +40,7 @@ end
 part2 = rotations.sum do |rotation|
   rotation.each_cons(3).sum do |rows|
     candidates = rows.map { |row| row.each_cons(3).to_a }.transpose
-    candidates.sum { (_1 in [['M', _, 'S'], [_, 'A', _], ['M', _, 'S']]) ? 1 : 0 }
+    candidates.count { (_1 in [['M', _, 'S'], [_, 'A', _], ['M', _, 'S']]) }
   end
 end
 
