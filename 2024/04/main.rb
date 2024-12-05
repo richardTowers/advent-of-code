@@ -41,13 +41,7 @@ end
 part2 = rotations.sum do |rotation|
   rotation.each_cons(3).sum do |rows|
     candidates = rows.map { |row| row.each_cons(3).to_a }.transpose
-    candidates.sum do |candidate|
-      if candidate in [['M', _, 'S'], [_, 'A', _ ], ['M', _, 'S']]
-        1
-      else
-        0
-      end
-    end
+    candidates.sum { (_1 in [['M', _, 'S'], [_, 'A', _], ['M', _, 'S']]) ? 1 : 0 }
   end
 end
 
