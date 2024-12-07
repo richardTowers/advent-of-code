@@ -3,13 +3,16 @@
 
 # Definitions
 Equation = Data.define(:test_value, :numbers) do
-  def valid?(operands)
-    possible_values(operands).include?(test_value)
+  def valid?(*operators)
+    possible_values(*operators).include?(test_value)
   end
 
-  def possible_values(operands)
-    numbers.drop(1).reduce([numbers.first]) do |acc, n|
-      acc.flat_map { operands.call(_1, n) }.select { _1 <= test_value }
+  def possible_values(*operators)
+    first, *rest = numbers
+    rest.reduce([first]) do |possibilities, num|
+      possibilities.flat_map do |poss|
+        operators.map { _1.call(poss, num) }.reject { _1 > test_value }
+      end
     end
   end
 end
@@ -22,13 +25,16 @@ equations = lines.map do |line|
 end
 
 # Part 1
+add = ->(a, b) { a + b }
+mul = ->(a, b) { a * b }
 part1 = equations
-        .select { _1.valid?(->(l, r) { [l + r, l * r] }) }
+        .select { _1.valid?(add, mul) }
         .sum(&:test_value)
 
 # Part 2
+cat = ->(a, b) { "#{a}#{b}".to_i }
 part2 = equations
-        .select { _1.valid?(->(l, r) { [l + r, l * r, "#{l}#{r}".to_i] }) }
+        .select { _1.valid?(add, mul, cat) }
         .sum(&:test_value)
 
 # Print output
