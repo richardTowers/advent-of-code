@@ -11,24 +11,33 @@ antenna_coords = grid
                  .group_by { _2 }
                  .transform_values { _1.map(&:first) }
 
-antinodes = antenna_coords.transform_values do |coords|
-  coords
-    .product(coords)
-    .reject { _1 == _2 }
-    .map(&:to_set)
-    .uniq
-    .map(&:to_a)
-    .flat_map do
-      vector = _2 - _1
-      [_1 - vector, _2 + vector]
-    end.select { grid.key?(_1) }
+def find_antinodes(antenna_coords, &block)
+  antenna_coords.values.flat_map do |coords|
+    coords
+      .product(coords)
+      .reject { _1 == _2 }
+      .map(&:to_set)
+      .uniq
+      .map(&:to_a)
+      .flat_map { |first, second| block.call(first, second) }
+  end.uniq
 end
 
 # Part 1
-part1 = antinodes.values.flatten.uniq.count
+part1 = find_antinodes(antenna_coords) do |first, second|
+  antenna_vector = second - first
+  grid.key?(first - antenna_vector) || grid.key?(second + antenna_vector)
+end.count
 
 # Part 2
-part2 = nil
+part2 = find_antinodes(antenna_coords) do |first, second|
+  antenna_vector = second - first
+  grid.keys.select do |coord|
+    vector = second - coord
+    harmonic = vector / antenna_vector
+    harmonic.imag.zero?
+  end
+end.count
 
 # Print output
 puts "Part 1: #{part1}"
