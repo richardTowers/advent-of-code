@@ -9,7 +9,7 @@ FreeSpace = Data.define(:length)
 input = ARGF.read.chomp.split('').map(&:to_i)
 disk = input.map.with_index do |x, i|
   if i.even?
-    FileBlocks.new(i/2, x)
+    FileBlocks.new(i / 2, x)
   else
     FreeSpace.new(x)
   end
@@ -19,39 +19,43 @@ def defrag(disk)
   case disk
   in [] then []
   in [FreeSpace] then disk
-  in [FileBlocks => head, *tail]
+  in [FileBlocks => head, *tail] # Ignore leading file blocks
     [head, *defrag(tail)]
-  in [FreeSpace => head_free_space, *rest, FreeSpace => tail_free_space]
-    [*defrag([head_free_space, *rest]), tail_free_space]
-  in [FreeSpace => free_space, *rest, FileBlocks => file_blocks]
-    if free_space.length == file_blocks.length
-      [file_blocks, *defrag(rest)]
-    elsif free_space.length > file_blocks.length
-      remaining_space = FreeSpace.new(free_space.length - file_blocks.length)
-      [file_blocks, *defrag([remaining_space, *rest])]
+  in [*rest, FreeSpace => tail_free_space] # Ignore trailing space
+    [*defrag(rest), tail_free_space]
+  in [*rest, FileBlocks => file_blocks]
+    i = rest.index { _1.is_a?(FreeSpace) && _1.length >= file_blocks.length }
+    if i.nil?
+      [*defrag(rest), file_blocks]
     else
-      eaten_file_blocks = FileBlocks.new(file_blocks.id, free_space.length)
-      remaining_file_blocks = FileBlocks.new(file_blocks.id, file_blocks.length - free_space.length)
-      [eaten_file_blocks, *defrag([*rest, remaining_file_blocks])]
+      space = rest[i]
+      inter = if space.length == file_blocks.length
+                [file_blocks]
+              else
+                [file_blocks, FreeSpace.new(space.length - file_blocks.length)]
+              end
+      defrag(rest[0...i] + inter + rest[(i + 1)..] + [FreeSpace.new(file_blocks.length)])
     end
   end
 end
 
 pos = 0
 total = 0
-defrag(disk).each_with_index do |segment, i|
+defrag(disk).each do |segment|
   total += case segment
            when FreeSpace then 0
-           when FileBlocks then (pos...pos + segment.length).sum { _1 * segment.id }
+           when FileBlocks
+             # TODO: do this more efficiently
+             (pos...pos + segment.length).sum { _1 * segment.id }
            end
   pos += segment.length
 end.to_a
 
 # Part 1
-part1 = total
+part1 = nil
 
 # Part 2
-part2 = nil
+part2 = total
 
 # Print output
 puts "Part 1: #{part1}"
