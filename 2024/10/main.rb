@@ -9,31 +9,28 @@ map = lines.flat_map.with_index do |row, ri|
   end
 end.to_h
 
-# Try a depth first search first, because I know how to do those
-trail_head_coords = map.select { _2.zero? }.map(&:first)
-def walk(coords, map, next_level)
-  new_coords = coords
-               .product([-1, 1, 1i, -1i])
-               .map { _1 + _2 }
-               # Comment out the .uniq for part 2
-               .uniq
-               .map { [_1, map[_1]] }
-               .select { _2 == next_level }
+# Part 1
+def walk(coords, map, next_level, &block)
+  new_coords = block.call(
+    coords
+      .product([-1, 1, 1i, -1i])
+      .map { _1 + _2 }
+      .map { [_1, map[_1]] }
+      .select { _2 == next_level }
+      .map(&:first)
+  )
 
-  if new_coords.empty? || next_level == 9
-    new_coords.count
-  else
-    walk(new_coords.map(&:first), map, next_level + 1)
-  end
+  return new_coords.count if new_coords.empty? || next_level == 9
+
+  walk(new_coords, map, next_level + 1, &block)
 end
 
-pp trail_head_coords.sum { walk([_1], map, 1) }
+trail_head_coords = map.select { _2.zero? }.map(&:first)
 
-# Part 1
-part1 = nil
+part1 = trail_head_coords.sum { |coord| walk([coord], map, 1, &:uniq) }
 
 # Part 2
-part2 = nil
+part2 = trail_head_coords.sum { |coord| walk([coord], map, 1, &:itself) }
 
 # Print output
 puts "Part 1: #{part1}"
