@@ -11,15 +11,7 @@ end.to_h
 
 # Part 1
 def walk(coords, map, next_level, &block)
-  new_coords = block.call(
-    coords
-      .product([-1, 1, 1i, -1i])
-      .map { _1 + _2 }
-      .map { [_1, map[_1]] }
-      .select { _2 == next_level }
-      .map(&:first)
-  )
-
+  new_coords = block.call(coords.product([-1, 1, 1i, -1i]).map(&:sum).select { map[_1] == next_level })
   return new_coords.count if new_coords.empty? || next_level == 9
 
   walk(new_coords, map, next_level + 1, &block)
