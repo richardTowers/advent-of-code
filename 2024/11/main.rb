@@ -9,7 +9,7 @@ def blink_stone(stone)
   if log.even?
     magnitude = 10**(log / 2)
     first_digits = stone / magnitude
-    last_digits = stone - first_digits * magnitude
+    last_digits = stone % magnitude
     return [first_digits, last_digits]
   end
 
