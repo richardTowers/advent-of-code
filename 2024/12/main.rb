@@ -1,10 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'bundler/inline'
-gemfile { gem 'rspec' }
-require 'rspec/autorun'
-
 # Parse input
 lines = ARGF.readlines
 grid = lines.flat_map.with_index do |row, ri|
@@ -40,65 +36,6 @@ def flood_fill(grid)
   regions
 end
 
-def walk_boundary(coords)
-  start = coords.first
-
-  wind = 1
-  direction = 1
-  coord = start
-  sides = 1
-  loop do
-    neighbours = [
-      coord + (direction * -1i),
-      coord + direction,
-      coord + (direction * 1i),
-      coord - direction
-    ]
-    case neighbours
-    in [l, _, _, _] if coords.include?(l)
-      coord = l
-      direction *= -1i
-      sides += 1
-      wind -= 1
-    in [_, f, _, _] if coords.include?(f)
-      coord = f
-    in [_, _, r, _] if coords.include?(r)
-      coord = r
-      direction *= 1i
-      sides += 1
-      wind += 1
-    in [_, _, _, b] if coords.include?(b)
-      coord = b
-      direction *= -1
-      sides += 2
-      wind += 2
-    else
-      # Must be a cell on its own, as none of its neighbours are in the region
-      sides += 3
-      wind += 3
-    end
-    next unless coord == start
-
-    break
-  end
-  sides + (4 - wind)
-end
-
-# Tests
-RSpec.describe '#walk_boundary' do
-  it 'returns 4 for a single coord' do
-    expect(walk_boundary([0])).to be 4
-  end
-
-  it 'returns 4 for coords in a straight horizontal line' do
-    expect(walk_boundary((1..10).to_a)).to be 4
-  end
-
-  it 'returns 4 for coords in a straight vertical line' do
-    expect(walk_boundary((1..10).map { _1 * 1i }.to_a)).to be 4
-  end
-end
-
 regions = flood_fill(grid)
 
 # Part 1
@@ -113,12 +50,8 @@ end
 # Part 2
 part2 = regions.sum do |_id, nodes|
   area = nodes.count
-
-  coords = nodes.map(&:first)
-  sides = walk_boundary(coords)
-  puts "A region of #{nodes.first[1]} plants with price #{area} * #{sides} = #{area * sides}."
-
-  area * sides
+  # TODO
+  area * 0
 end
 
 # Print output
