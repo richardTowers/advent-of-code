@@ -12,26 +12,23 @@ end.to_h
 def flood_fill(grid)
   queue = []
   visited = Set[]
-  regions = Hash.new { [] }
-  region_id = 0
-  until (node = grid.find { |node| !visited.include?(node) }).nil?
-    queue << node
-    plant_type = node[1]
+  regions = []
+  until (coord = grid.keys.find { !visited.include?(_1) }).nil?
+    queue << coord
+    current_cell = grid[coord]
     region = []
     until queue.empty?
-      node = queue.shift
-      next unless node[1] == plant_type
+      candidate = queue.shift
+      next unless grid[candidate] == current_cell
 
-      region << node
-      visited << node
+      region << candidate
+      visited << candidate
       [1, -1, 1i, -1i]
-        .map { [node[0] + _1, grid[node[0] + _1]] }
-        .each do |neighbour|
-          queue << neighbour unless neighbour[1].nil? || visited.include?(neighbour) || queue.include?(neighbour)
-      end
+        .map { candidate + _1 }
+        .select { grid.key?(_1) && !(visited.include?(_1) || queue.include?(_1)) }
+        .each { queue << _1 }
     end
-    regions[region_id] = region
-    region_id += 1
+    regions << region
   end
   regions
 end
@@ -39,19 +36,20 @@ end
 regions = flood_fill(grid)
 
 # Part 1
-part1 = regions.sum do |_id, nodes|
-  area = nodes.count
-  plant_type = nodes.first[1]
-  sides = nodes.flat_map { |node| [1, -1, 1i, -1i].map { _1 + node[0] }.map { [_1, grid[_1]] } }
-  perimeter = sides.count { |side| side[1] != plant_type }
-  area * perimeter
+part1 = regions.sum do |coords|
+  area = coords.count
+  perimeter = coords.product([1, -1, 1i, -1i]).reject { coords.include?(_1 + _2) }
+  area * perimeter.count
 end
 
 # Part 2
-part2 = regions.sum do |_id, nodes|
-  area = nodes.count
-  # TODO
-  area * 0
+part2 = regions.sum do |coords|
+  area = coords.count
+  perimeter = coords.product([1, -1, 1i, -1i]).reject { coords.include?(_1 + _2) }
+  # Credit to /u/4HbQ for this trick - https://www.reddit.com/r/adventofcode/comments/1hcdnk0/comment/m1nj6se/
+  # which I don't fully understand :|
+  edges = perimeter - perimeter.map { |coord, dir| [coord + dir * 1i, dir] }
+  area * edges.count
 end
 
 # Print output
