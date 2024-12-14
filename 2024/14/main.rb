@@ -17,8 +17,8 @@ def position_after(robot, seconds)
   Complex.rect(new_p.real % WIDTH, new_p.imag % HEIGHT)
 end
 
-part1_positions = robots.map { position_after(_1, 100) }.tally
-l, r = part1_positions
+positions = robots.map { position_after(_1, 100) }.tally
+l, r = positions
        .reject { |pos, _count| pos.real == WIDTH / 2 }
        .reject { |pos, _count| pos.imag == HEIGHT / 2 }
        .partition { |pos, _count| pos.real < WIDTH / 2 }
@@ -26,16 +26,14 @@ l, r = part1_positions
 tl, bl = l.partition { |pos, _count| pos.imag < HEIGHT / 2 }
 tr, br = r.partition { |pos, _count| pos.imag < HEIGHT / 2 }
 
-pp tl.sum { _2 }
-pp bl.sum { _2 }
-pp tr.sum { _2 }
-pp br.sum { _2 }
-
 # Part 1
 part1 = [tl, bl, tr, br].map { |quad| quad.sum { _2 } }.inject(&:*)
 
-# Part 2
-part2 = nil
+part2 = (0..).find do |i|
+  positions = robots.map { position_after(_1, i) }.tally
+  overlap_count = positions.count { _2 > 1 }
+  overlap_count.zero?
+end
 
 # Print output
 puts "Part 1: #{part1}"
