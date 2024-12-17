@@ -23,41 +23,48 @@ def combo(operand, a, b, c)
   end
 end
 
-ip = 0
-output = []
-while ip < prog.length
-  # NOTE: much easier to debug if we output things in base 8,
-  # as there's a bunch of base 8 modular arithmetic
-  puts <<~EOF
-    ----
-    Register A: #{a.to_s(8)}
-    Register B: #{b.to_s(8)}
-    Register C: #{c.to_s(8)}
-    IP: #{ip}
-    Output: #{output}
-  EOF
-  case prog[ip]
-  in [0, operand] then a /= 2**combo(operand, a, b, c)
-  in [1, operand] then b ^= operand
-  in [2, operand] then b = combo(operand, a, b, c) % 8
-  in [3, operand]
-    if a != 0
-      ip = operand
-      next
+def run(prog, a, b, c)
+  ip = 0
+  output = []
+  while ip < prog.length
+    case prog[ip]
+    in [0, operand] then a /= 2**combo(operand, a, b, c)
+    in [1, operand] then b ^= operand
+    in [2, operand] then b = combo(operand, a, b, c) % 8
+    in [3, operand]
+      if a != 0
+        ip = operand
+        next
+      end
+    in [4, _] then b ^= c
+    in [5, operand] then output << combo(operand, a, b, c) % 8
+    in [6, operand] then b = a / 2**combo(operand, a, b, c)
+    in [7, operand] then c = a / 2**combo(operand, a, b, c)
     end
-  in [4, _] then b ^= c
-  in [5, operand] then output << combo(operand, a, b, c) % 8
-  in [6, operand] then b = a / 2**combo(operand, a, b, c)
-  in [7, operand] then c = a / 2**combo(operand, a, b, c)
+    ip += 1
   end
-  ip += 1
+  output
 end
 
 # Part 1
-part1 = output.join(',')
+part1 = run(prog, a, b, c).join(',')
+
+def find_register(full_prog, instructions, register = 0, pairs = [])
+  case instructions
+  in [] then register / 0o100
+  in [*init, last_pair]
+    results = (0...0o100)
+              .map { register + _1 }
+              .to_h { [_1, run(full_prog, _1, 0, 0)] }
+    options = results.select { _2 == last_pair + pairs }
+    options.flat_map do |reg, ps|
+      find_register(full_prog, init, reg * 0o100, ps)
+    end
+  end
+end
 
 # Part 2
-part2 = nil
+part2 = find_register(prog, prog).min
 
 # Print output
 puts "Part 1: #{part1}"
