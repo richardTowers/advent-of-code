@@ -12,6 +12,8 @@ def bfs(walls, size, start, target, time)
   directions = [1 + 0i, -1 + 0i, 0 + 1i, 0 - 1i]
   visited = Set[]
   queue = [start]
+  current_walls = walls.select { _2 <= time }.map(&:first).to_set
+
   until queue.empty?
     v = queue.shift
     return v[1] if v[0] == target
@@ -19,7 +21,7 @@ def bfs(walls, size, start, target, time)
     neighbours = directions
                  .map { [v[0] + _1, v[1].next] }
                  .select { |coord, _| coord.rect.all? { (0..size).include?(_1) } }
-                 .reject { |coord, _| walls.select { _2 <= time }.map(&:first).include?(coord) }
+                 .reject { |coord, _| current_walls.include?(coord) }
                  .reject { |coord, _| visited.include?(coord) }
     neighbours.each do |n|
       queue << n
