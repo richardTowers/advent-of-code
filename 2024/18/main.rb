@@ -8,7 +8,7 @@ walls = lines.map.with_index do |line, time|
   [x + 1i * y, time]
 end
 
-def bfs(walls, size, start, target)
+def bfs(walls, size, start, target, time)
   directions = [1 + 0i, -1 + 0i, 0 + 1i, 0 - 1i]
   visited = Set[]
   queue = [start]
@@ -19,7 +19,7 @@ def bfs(walls, size, start, target)
     neighbours = directions
                  .map { [v[0] + _1, v[1].next] }
                  .select { |coord, _| coord.rect.all? { (0..size).include?(_1) } }
-                 .reject { |coord, _| walls.select { _2 <= 1024 }.map(&:first).include?(coord) }
+                 .reject { |coord, _| walls.select { _2 <= time }.map(&:first).include?(coord) }
                  .reject { |coord, _| visited.include?(coord) }
     neighbours.each do |n|
       queue << n
@@ -29,10 +29,19 @@ def bfs(walls, size, start, target)
 end
 
 # Part 1
-part1 = bfs(walls, 70, [0i, 0], 70 + 70i)
+part1 = bfs(walls, 70, [0i, 0], 70 + 70i, 1024)
 
 # Part 2
-part2 = nil
+lower = 1024
+upper = walls.length
+trial = (lower + upper) / 2
+while (upper - lower) > 1
+  result = bfs(walls, 70, [0i, 0], 70 + 70i, trial)
+  result.nil? ? (upper = trial) : (lower = trial)
+  trial = (lower + upper) / 2
+end
+
+part2 = walls[upper][0].rect.join(',')
 
 # Print output
 puts "Part 1: #{part1}"
