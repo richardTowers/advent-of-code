@@ -7,7 +7,7 @@ def count_arrangements(target, patterns, memo = {})
       1
     else
       patterns.select { target.start_with?(_1) }.sum do |prefix|
-        count_arrangements(target.sub(/^#{prefix}/, ''), patterns, memo)
+        count_arrangements(target[prefix.length..], patterns, memo)
       end
     end
 end
