@@ -1,14 +1,13 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-$memo = {}
-def count_arrangements(target, patterns)
-  $memo[target] ||=
+def count_arrangements(target, patterns, memo = {})
+  memo[target] ||=
     if target.empty?
       1
     else
       patterns.select { target.start_with?(_1) }.sum do |prefix|
-        count_arrangements(target.sub(/^#{prefix}/, ''), patterns)
+        count_arrangements(target.sub(/^#{prefix}/, ''), patterns, memo)
       end
     end
 end
