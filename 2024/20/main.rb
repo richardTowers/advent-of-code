@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-DIRECTIONS = [1 + 0i, -1 + 0i, 0 + 1i, 0 - 1i]
+DIRECTIONS = [1 + 0i, -1 + 0i, 0 + 1i, 0 - 1i].freeze
 
 # Parse input
 lines = ARGF.readlines
@@ -18,8 +18,6 @@ def breadth_first_traversal(walls, size, start)
 
   until queue.empty?
     v = queue.shift
-    # return parents if v == target
-
     neighbours = DIRECTIONS
                  .map { v + _1 }
                  .select { |coord| coord.rect.all? { (0..size).include?(_1) } }
@@ -35,13 +33,10 @@ def breadth_first_traversal(walls, size, start)
   parents
 end
 
-def path(start, target, parents, give_up_after = Float::INFINITY)
+def path(start, target, parents)
   result = [target]
-  until target == start || give_up_after.zero?
-    give_up_after -= 1
+  until target == start
     target = parents[target]
-    return if target.nil?
-
     result << target
   end
   result
@@ -53,33 +48,22 @@ target = map.find { _2 == 'E' }.first
 size = map.keys.map(&:real).max
 
 parents = breadth_first_traversal(walls, size, start)
-path = path(start, target, parents)
+path = path(start, target, parents).map.with_index.to_h
 
-cheats = {}
-path.each_with_index do |cheat_start, honest_path_remaining|
-  pp 100 * honest_path_remaining.to_f / path.length
-  cheat_ends = DIRECTIONS.product(DIRECTIONS).map(&:sum)
-                         .reject(&:zero?)
-                         .map { cheat_start + _1 }
-                         .reject { map[_1] == '#' }
-                         .uniq
-  cheat_ends.each do |cheat_end|
-    p = path(cheat_end, target, parents, honest_path_remaining)
-    unless p.nil? || p.length + 1 >= honest_path_remaining
-      cheats[[cheat_start, cheat_end]] = honest_path_remaining - (p.length + 1)
+def count_cheats(path, max_dist)
+  path.sum do |a, a_dist|
+    path.count do |b, b_dist|
+      dist = (a.real - b.real).abs + (a.imag - b.imag).abs
+      dist <= max_dist && b_dist + dist <= a_dist - 100
     end
   end
 end
-cheat_savings = cheats.group_by { _2 }.transform_values(&:count).sort
-cheat_savings.each do |saving, count|
-  puts "There #{count == 1 ? 'is one cheat' : "are #{count} cheats"} that save #{saving} picoseconds"
-end
 
 # Part 1
-part1 = cheat_savings.select { _1 >= 100 }.sum { _2 }
+part1 = count_cheats(path, 2)
 
 # Part 2
-part2 = nil
+part2 = count_cheats(path, 20)
 
 # Print output
 puts "Part 1: #{part1}"
