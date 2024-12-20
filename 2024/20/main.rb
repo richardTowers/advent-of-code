@@ -48,7 +48,7 @@ target = map.find { _2 == 'E' }.first
 size = map.keys.map(&:real).max
 
 parents = breadth_first_traversal(walls, size, start)
-path = path(start, target, parents).map.with_index.to_h
+path = path(start, target, parents).map.with_index
 
 def count_cheats(path, max_dist)
   path.sum do |a, a_dist|
