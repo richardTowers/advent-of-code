@@ -23,7 +23,7 @@ def dijkstra(coords_and_directions, start, target)
     # TODO - this is an accidental quadratic
     u = queue.min_by { dist[_1] }
     queue.delete(u)
-    pp queue.length
+    pp queue.length if (queue.length % 100).zero?
     break if u[0] == target
 
     neighbours = [[u[0] + u[1], u[1]], [u[0], u[1] * 1i], [u[0], u[1] * -1i]]
@@ -43,10 +43,12 @@ def dijkstra(coords_and_directions, start, target)
   [dist, prev]
 end
 
-dist, = dijkstra(coords_and_directions, start, e)
+dist, prev = dijkstra(coords_and_directions, start, e)
 
 # Part 1
 part1 = dist.select { |key,| key.first == e }.values.min - 1000 # hack
+
+binding.irb
 
 # Part 2
 part2 = nil
