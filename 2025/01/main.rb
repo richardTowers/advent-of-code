@@ -7,11 +7,11 @@ input = ARGF.readlines
 dial = 50
 positions = input.map do |dir, n|
   case dir
-  in "L" then dial = (dial - n) % 100
-  in "R" then dial = (dial + n) % 100
+  in "L" then dial = (dial - n)
+  in "R" then dial = (dial + n)
   end
-  puts dial
-  dial
 end
 
-pp positions.count { it.zero? }
+puts "Part 1: #{positions.count { (it % 100).zero? }}"
+
+
