@@ -1,19 +1,26 @@
 #!/usr/bin/env ruby
 
-x = ARGF
-    .read
-    .split(",")
-    .flat_map { Range.new(*it.chomp.split("-").map(&:to_i)).to_a }
-    .select do |n|
-      digits = n.to_s.length
-      next if digits % 2 != 0
+all_digits = ARGF
+  .read
+  .split(",")
+  .flat_map { Range.new(*it.chomp.split("-").map(&:to_i)).to_a }
 
-      left_half = n.to_s[0...digits/2]
-      right_half = n.to_s[digits/2..]
-      [left_half, right_half]
-      left_half == right_half
-    end.sum
+part_1 = all_digits
+  .select do |n|
+    digits = n.to_s.split("")
+    digits == digits.rotate(digits.length / 2)
+  end.sum
 
-pp x
+part_2 = all_digits
+  .select do |n|
+    digits = n.to_s.split("")
+    rotations = (1..digits.length / 2).map { digits.rotate(it) }
+    rotations.include?(digits)
+  end.sum
+
+pp [
+  part_1,
+  part_2,
+]
   
 
