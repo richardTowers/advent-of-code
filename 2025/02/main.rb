@@ -3,7 +3,8 @@
 all_digits = ARGF
   .read
   .split(",")
-  .flat_map { Range.new(*it.chomp.split("-").map(&:to_i)).to_a }
+  .map { it.split("-").map(&:to_i) }
+  .flat_map { [*_1.._2] }
 
 part_1 = all_digits
   .select do |n|
@@ -14,8 +15,7 @@ part_1 = all_digits
 part_2 = all_digits
   .select do |n|
     digits = n.to_s.split("")
-    rotations = (1..digits.length / 2).map { digits.rotate(it) }
-    rotations.include?(digits)
+    (1..digits.length / 2).map { digits.rotate(it) }.include?(digits)
   end.sum
 
 pp [
