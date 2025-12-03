@@ -2,15 +2,15 @@
 
 banks = ARGF.readlines.map(&:chomp)
 
-def largest_joltage(bank, battery_count)
-  return "" if battery_count < 1
-  max = bank[..-battery_count].chars.max
-  index = bank.index(max)
-  max + largest_joltage(bank[index+1..], battery_count - 1)
+def joltmax(bank, count)
+  return "" if count < 1
+
+  max = bank[..-count].chars.max
+  max + joltmax(bank[bank.index(max)+1..], count - 1)
 end
 
 
 pp [
-  banks.map { largest_joltage(it,  2) }.sum(&:to_i),
-  banks.map { largest_joltage(it, 12) }.sum(&:to_i),
+  banks.map { joltmax(it,  2) }.sum(&:to_i),
+  banks.map { joltmax(it, 12) }.sum(&:to_i),
 ]
