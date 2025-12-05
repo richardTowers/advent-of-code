@@ -8,7 +8,7 @@ def combine_ranges(ranges)
   overlaps = ranges
     .combination(2)
     .select { |l, r| l.overlap?(r) }
-    .map { |l, r| ([l.begin, r.begin].min..[l.end, r.end].max) }
+    .map { |l, r| Range.new(*(l.minmax+r.minmax).minmax) }
     .uniq
   ranges.reject { |r| overlaps.any? { |o| o.overlap?(r) } } + overlaps
 end
@@ -18,10 +18,7 @@ ranges = input[0].map { Range.new(*it.split("-").map(&:to_i)) }
 ids = input[1].map(&:to_i)
 
 part_1 = ids.count { |id| ranges.any? { |range| range.include?(id) } }
-
-combined_ranges = fixed_point(ranges) { combine_ranges(it) }
-
-part_2 = combined_ranges.sum(&:size)
+part_2 = fixed_point(ranges) { combine_ranges(it) }.sum(&:size)
 
 pp [
   part_1,
