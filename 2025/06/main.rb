@@ -7,20 +7,15 @@ part_1 = split_h.last
   .zip(split_h[...-1].map { it.map(&:to_i) }.transpose)
   .sum { _2.reduce(_1) }
 
-instructions = []
-current_instruction = []
-
-input.map { it.chomp.split("") }.transpose.each do |column|
-  if column.all? { it == " " }
-    instructions << current_instruction
-    current_instruction = []
-    next
-  end
+instructions = input.map { it.chomp.split("") }.transpose.flat_map do |column|
+  next [nil] if column.all? { it == " " }
   
-  current_instruction << column.last.to_sym if column.last != " "
-  current_instruction << column[...-1].join("").to_i
-end
-instructions << current_instruction
+  if %w[+ *].include?(column.last)
+    [column.last.to_sym, column[...-1].join("").to_i]
+  else
+    [column.join("").to_i]
+  end
+end.slice_before(&:nil?).map(&:compact)
 
 part_2 = instructions.sum { |instructions| instructions[1..].reduce(instructions.first) }
 
