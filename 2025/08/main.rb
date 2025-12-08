@@ -1,33 +1,24 @@
 #!/usr/bin/env ruby
 
 input = $<.map { it.split(",").map(&:to_i) }
-distances = input
-  .combination(2)
-  .map { |l, r| [[l, r].to_set, l.zip(r).sum { (_1 - _2)**2 }] }
-  .sort_by { |_, distance| distance }
-
-forest = input.map { Set.new([it]) }
 
 connections = 0
-distances.reduce(forest) do |acc, (pair, d)|
-  if connections == 1000
-    puts "Part 1: #{acc.map(&:count).sort_by { -it }.take(3).reduce(:*)}"
+input
+  .combination(2)
+  .sort_by { |l, r| l.zip(r).sum { it.reduce(:-)**2 } }
+  .map(&:to_set)
+  .reduce(input.map { [it].to_set }) do |circuits, pair|
+    puts "Part 1: #{circuits.map(&:count).sort.reverse.take(3).reduce(:*)}" if connections == 1000
+  
+    intersecting, non_intersecting = circuits.partition { pair.intersect?(it) }
+    if intersecting.count > 0
+      connections += 1
+      result = [intersecting.reduce(:|)] + non_intersecting
+      break puts "Part 2: #{pair.map(&:first).reduce(:*)}" if result.count == 1
+  
+      result
+    else
+      non_intersecting
+    end
   end
-
-  intersecting, non_intersecting = acc.partition { pair.intersect?(it) }
-
-  result = if intersecting.count > 0
-             connections += 1
-             [intersecting.reduce(:|)] + non_intersecting
-           else
-             non_intersecting
-           end
-
-  if result.count == 1
-    puts "Part 2: #{pair.map(&:first).reduce(:*)}"
-    break result
-  end
-
-  result
-end
 
