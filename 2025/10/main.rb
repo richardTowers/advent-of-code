@@ -21,7 +21,7 @@ def toggle_state(state, wiring)
   new_state
 end
 
-def bfs(machine)
+def bfs(machine, start, target, &block)
   target = machine.target_state
   start = ["."] * target.count
 
@@ -38,8 +38,8 @@ def bfs(machine)
 
       return steps if state == target
 
-      machine.wirings.each do |wiring|
-        next_queue << toggle_state(state, wiring)
+      block.call(state).each do |new_state|
+        next_queue << new_state
       end
     end
 
@@ -49,4 +49,17 @@ def bfs(machine)
   end
 end
 
-pp input.sum(&method(:bfs))
+part_1 = input.sum do |machine|
+           bfs(machine, ["."] * machine.target_state.count, machine.target_state) do |state|
+             machine.wirings.map do |wiring|
+               toggle_state(state, wiring)
+             end
+           end
+         end
+
+part_2 = :TODO
+
+pp [
+  part_1,
+  part_2,
+]
