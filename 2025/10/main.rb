@@ -21,27 +21,7 @@ def toggle_state(state, wiring)
   new_state
 end
 
-def toggle_joltage(state, wiring)
-  new_state = state.dup
-  wiring.each do |index|
-    new_state[index] += 1
-  end
-  new_state
-end
-
-CACHE = {}
-def dfs(start, target, depth = 0, &block)
-  return [start] if start == target
-  
-  block.call(start).each do |new|
-    result = dfs(new, target, depth + 1, &block)
-    return [start, *result] if result
-  end
-
-  nil
-end
-
-def bfs(start, target, &block)
+def bfs(start, done, &block)
   visited = Set.new
   queue = [start]
   next_queue = []
@@ -53,7 +33,7 @@ def bfs(start, target, &block)
       next if visited.include?(state)
       visited.add(state)
 
-      return steps if state == target
+      return steps if done.call(state)
 
       block.call(state).each do |new_state|
         next_queue << new_state
@@ -66,19 +46,24 @@ def bfs(start, target, &block)
   end
 end
 
+def joltage_levels(wirings, counts)
+  wirings.zip(counts).reduce(wirings.map { 0 }) do |acc, (wiring, count)|
+    wiring.each { |i| acc[i] += count }
+    acc
+  end
+end
+
 part_1 = input.sum do |machine|
-           bfs(["."] * machine.target_state.count, machine.target_state) do |state|
+           start = machine.target_state.map { ?. }
+           bfs(start, lambda { |state| state == machine.target_state }) do |state|
              machine.wirings.map { |wiring| toggle_state(state, wiring) }
            end
          end
 
-start = [0] * input.first.joltage_reqs.count
-target = input.first.joltage_reqs
-wirings = input.first.wirings
-part_2 = dfs(start, target) do |state|
-  wirings.map { |wiring| toggle_joltage(state, wiring) }
-    .reject { |state| state.zip(target).any? { |l, r| l > r } }
-end
+part_2 = :TODO
+# machine = input.first
+# counter = machine.wirings.map { 0 }
+# bfs(counter, 
 
 pp [
   part_1,
