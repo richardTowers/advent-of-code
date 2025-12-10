@@ -29,6 +29,18 @@ def toggle_joltage(state, wiring)
   new_state
 end
 
+CACHE = {}
+def dfs(start, target, depth = 0, &block)
+  return [start] if start == target
+  
+  block.call(start).each do |new|
+    result = dfs(new, target, depth + 1, &block)
+    return [start, *result] if result
+  end
+
+  nil
+end
+
 def bfs(start, target, &block)
   visited = Set.new
   queue = [start]
@@ -60,7 +72,13 @@ part_1 = input.sum do |machine|
            end
          end
 
-part_2 = :TODO
+start = [0] * input.first.joltage_reqs.count
+target = input.first.joltage_reqs
+wirings = input.first.wirings
+part_2 = dfs(start, target) do |state|
+  wirings.map { |wiring| toggle_joltage(state, wiring) }
+    .reject { |state| state.zip(target).any? { |l, r| l > r } }
+end
 
 pp [
   part_1,
