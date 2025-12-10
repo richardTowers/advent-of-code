@@ -21,10 +21,15 @@ def toggle_state(state, wiring)
   new_state
 end
 
-def bfs(machine, start, target, &block)
-  target = machine.target_state
-  start = ["."] * target.count
+def toggle_joltage(state, wiring)
+  new_state = state.dup
+  wiring.each do |index|
+    new_state[index] += 1
+  end
+  new_state
+end
 
+def bfs(start, target, &block)
   visited = Set.new
   queue = [start]
   next_queue = []
@@ -50,10 +55,8 @@ def bfs(machine, start, target, &block)
 end
 
 part_1 = input.sum do |machine|
-           bfs(machine, ["."] * machine.target_state.count, machine.target_state) do |state|
-             machine.wirings.map do |wiring|
-               toggle_state(state, wiring)
-             end
+           bfs(["."] * machine.target_state.count, machine.target_state) do |state|
+             machine.wirings.map { |wiring| toggle_state(state, wiring) }
            end
          end
 
