@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+
+Machine = Data.define(:target_state, :wirings, :joltage_reqs)
+
+input = $<.map { it.split(" ") }.map do |row|
+  Machine.new(
+    target_state: row.first[1...-1].split(""),
+    wirings: row[1...-1].map { it[1...-1].split(",").map(&:to_i) },
+    joltage_reqs: row.last[1...-1].split(",").map(&:to_i)
+  )
+end
+
+def toggle_state(state, wiring)
+  new_state = state.dup
+  wiring.each do |index|
+    new_state[index] = case new_state[index]
+                       in "." then "#"
+                       in "#" then "."
+                       end
+  end
+  new_state
+end
+
+def bfs(machine)
+  target = machine.target_state
+  start = ["."] * target.count
+
+  visited = Set.new
+  queue = [start]
+  next_queue = []
+
+  steps = 0
+
+  while !queue.empty?
+    queue.each do |state|
+      next if visited.include?(state)
+      visited.add(state)
+
+      return steps if state == target
+
+      machine.wirings.each do |wiring|
+        next_queue << toggle_state(state, wiring)
+      end
+    end
+
+    queue = next_queue
+    next_queue = []
+    steps += 1
+  end
+end
+
+pp input.sum(&method(:bfs))
